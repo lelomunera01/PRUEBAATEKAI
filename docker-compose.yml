@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  # Backend NestJS
+  backend:
+    build: ./my
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=file:./dev.db
+      - PORT=3001
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/ai-agent-cohere-activado
+      - N8N_BASIC_USER=admin
+      - N8N_BASIC_PASS=admin123
+    volumes:
+      - ./my/prisma:/usr/src/app/prisma
+    networks:
+      - kanban-network
+
+  # n8n para automatización y AI Agent
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=America/Bogota
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - BACKEND_URL=http://host.docker.internal:3001
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - kanban-network
+    depends_on:
+      - backend
+
+networks:
+  kanban-network:
+    driver: bridge
+
+volumes:
+  n8n_data:

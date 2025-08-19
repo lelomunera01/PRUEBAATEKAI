@@ -1,0 +1,44 @@
+{
+  "name": "Echo Webhook (minimo compatible)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-agent-cohere-activado",
+        "responseMode": "responseNode"
+      },
+      "id": "WebhookTrigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-420, 0]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Modo clasico (typeVersion 1)\n// Toma el primer item y arma una respuesta simple\nconst first = items[0] || { json: {} };\nreturn [{ json: { ok: true, echo: first.json } }];"
+      },
+      "id": "Echo",
+      "name": "Echo",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [-160, 0]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}"
+      },
+      "id": "Responder",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [80, 0]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Echo", "type": "main", "index": 0 }]]
+    },
+    "Echo": { "main": [[{ "node": "Responder", "type": "main", "index": 0 }]] }
+  },
+  "active": false
+}

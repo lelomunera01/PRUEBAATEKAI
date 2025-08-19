@@ -1,0 +1,54 @@
+{
+  "name": "AI Agent - Bloqueadas (minimo)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-agent-cohere-activado",
+        "responseMode": "responseNode"
+      },
+      "id": "WebhookTrigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-520, 0]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.BACKEND_URL}}/tareas/bloqueadas",
+        "responseFormat": "json"
+      },
+      "id": "HttpBloqueadas",
+      "name": "GET Tareas Bloqueadas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [-260, 0]
+    },
+    {
+      "parameters": {
+        "functionCode": "const arr = items[0] && Array.isArray(items[0].json) ? items[0].json : [];\nreturn [{ json: { respuesta: `Hay ${arr.length} tareas bloqueadas.`, data: arr, accion: 'tareas_bloqueadas' } }];"
+      },
+      "id": "Formato",
+      "name": "Formato",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [-20, 0]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}"
+      },
+      "id": "Responder",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [220, 0]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": { "main": [[{ "node": "GET Tareas Bloqueadas", "type": "main", "index": 0 }]] },
+    "GET Tareas Bloqueadas": { "main": [[{ "node": "Formato", "type": "main", "index": 0 }]] },
+    "Formato": { "main": [[{ "node": "Responder", "type": "main", "index": 0 }]] }
+  },
+  "active": false
+}
